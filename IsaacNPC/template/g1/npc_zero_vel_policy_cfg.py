@@ -9,10 +9,10 @@ from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import SceneEntityCfg, ActionTerm
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
-from IsaacNPC.action.pretrained_action.pretrained_vel_policy_action import PreTrainedVelPolicyAction, PreTrainedVelPolicyActionCfg
+from IsaacNPC.action.npc_action.npc_action_vel import NPCActionVelCfg
 
 @configclass
-class G1VelPolicyActionsCfg:
+class G1NPCVelPolicyActionsCfg:
     @configclass
     class PolicyCfg(ObsGroup):
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel, clip=(-100, 100))
@@ -28,7 +28,7 @@ class G1VelPolicyActionsCfg:
             self.enable_corruption = True
             self.concatenate_terms = True
     
-    vel_action:ActionTerm = PreTrainedVelPolicyActionCfg(
+    npc_vel_action:ActionTerm = NPCActionVelCfg(
             asset_name="asset_name",
             policy_path="data/ckpts/g1/g1_29d_loco_walk.pt",
             low_level_observations=PolicyCfg(),
@@ -38,7 +38,7 @@ class G1VelPolicyActionsCfg:
         )
         
 @configclass
-class G1VelPolicyEventsCfg:
+class G1NPCVelPolicyEventsCfg:
     physics_material = EventTerm(
         func=mdp.randomize_rigid_body_material,
         mode="startup",
@@ -66,6 +66,7 @@ class G1VelPolicyEventsCfg:
             },
         },
     )
+    
     reset_robot_joints = EventTerm(
         func=mdp.reset_joints_by_scale,
         mode="reset",

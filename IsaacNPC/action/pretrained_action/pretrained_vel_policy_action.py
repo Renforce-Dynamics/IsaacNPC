@@ -14,7 +14,7 @@ from isaaclab.utils.assets import check_file_path, read_file
 
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import ObservationTermCfg as ObsTerm
-from soccerLab.utils.func_tools import has_param
+from IsaacNPC.utils.func_tools import has_param
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv

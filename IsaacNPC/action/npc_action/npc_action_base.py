@@ -15,12 +15,13 @@ from isaaclab.utils.assets import check_file_path, read_file
 from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.envs import mdp
-
+from isaaclab.managers import ObservationTermCfg as ObsTerm
 from ..null_action import NullAction, NullActionCfg
+
+from IsaacNPC.utils.func_tools import has_param
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
-
 
 class NPCActionBase(NullAction):
     """
@@ -28,8 +29,15 @@ class NPCActionBase(NullAction):
     """
 
     cfg: NPCActionBaseCfg
-    def __init__(self, cfg, env):
+    def __init__(self, cfg: "NPCActionBaseCfg", env):
         super().__init__(cfg, env)
+        
+        cfg.low_level_actions.asset_name = self.cfg.asset_name
+        for term in vars(cfg.low_level_observations).values():
+            if isinstance(term, ObsTerm):
+                if has_param(term.func, "asset_cfg"):
+                    term.params["asset_cfg"] = SceneEntityCfg(cfg.asset_name)
+        
         self.robot: Articulation = env.scene[cfg.asset_name]
         self.load_policy(cfg)
 
