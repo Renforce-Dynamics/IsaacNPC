@@ -71,52 +71,6 @@ class NPCActionBase(NullAction):
     def root_pos_env(self):
         return self.robot.data.root_pos_w - self.env.scene.env_origins
         
-    @staticmethod
-    def make_npc_determine_events(target_cfg, name):
-        physics_material = EventTerm(
-            func=mdp.randomize_rigid_body_material,
-            mode="startup",
-            params={
-                "asset_cfg": SceneEntityCfg(name, body_names=".*"),
-                "static_friction_range": (0.8, 0.8),
-                "dynamic_friction_range": (0.6, 0.6),
-                "restitution_range": (0.0, 0.0),
-                "num_buckets": 64,
-            },
-        )
-        
-        reset_base = EventTerm(
-            func=mdp.reset_root_state_uniform,
-            mode="reset",
-            params={
-                "asset_cfg": SceneEntityCfg(name),
-                "pose_range": {"x": (0.0, 0.0), "y": (0.0, 0.0), "yaw": (-3.14, 3.14)},
-                "velocity_range": {
-                    "x": (0.0, 0.0),
-                    "y": (0.0, 0.0),
-                    "z": (0.0, 0.0),
-                    "roll": (0.0, 0.0),
-                    "pitch": (0.0, 0.0),
-                    "yaw": (0.0, 0.0),
-                },
-            },
-        )
-        
-        reset_robot_joints = EventTerm(
-            func=mdp.reset_joints_by_scale,
-            mode="reset",
-            params={
-                "asset_cfg": SceneEntityCfg(name),
-                "position_range": (1.0, 1.0),
-                "velocity_range": (-1.0, 1.0),
-            },
-        )
-        
-        terms = ["physics_material", "reset_base", "reset_robot_joints"]
-        
-        for term in terms:
-            setattr(target_cfg, f"{name}_{term}", locals()[term])
-        
 @configclass
 class NPCActionBaseCfg(NullActionCfg):
     class_type: type[ActionTerm] = NPCActionBase
