@@ -58,6 +58,13 @@ class BatchVelocityPlanner:
         speed = torch.clamp(dist, max=self.max_lin_vel)
         v_xy = direction * speed.unsqueeze(1)
 
+        cos_yaw = torch.cos(yaw)
+        sin_yaw = torch.sin(yaw)
+        v_xy = torch.stack([
+            cos_yaw * v_xy[:, 0] + sin_yaw * v_xy[:, 1],
+            -sin_yaw * v_xy[:, 0] + cos_yaw * v_xy[:, 1],
+        ], dim=1)
+
         # yaw tracking
         yaw_error = torch.atan2(
             torch.sin(goal_yaw - yaw),

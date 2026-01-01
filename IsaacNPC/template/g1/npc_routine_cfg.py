@@ -29,19 +29,17 @@ class G1NPCRoutineActionsCfg:
             self.concatenate_terms = True
     
     npc_routine_action:ActionTerm = NPCActionRoutineCfg(
-            asset_name="asset_name",
-            policy_path="data/ckpts/g1/g1_29d_loco_walk.pt",
-            low_level_observations=PolicyCfg(),
-            low_level_actions=mdp.JointPositionActionCfg(
-                asset_name="asset_name", joint_names=[".*"], scale=0.25, use_default_offset=True
-            ),
-            routine_points=[
-                (0, 0, 0),
-                (10, 0, 0),
-                (10, 10, 3.14/4),
-                (0, 0, 0)
-            ]
-        )
+        asset_name="asset_name",
+        policy_path="data/ckpts/g1/g1_29d_loco_walk.pt",
+        low_level_observations=PolicyCfg(),
+        low_level_actions=mdp.JointPositionActionCfg(
+            asset_name="asset_name", joint_names=[".*"], scale=0.25, use_default_offset=True
+        ),
+        routine_points=[
+            (0, 0, 3.14 * 0.75), (6, 0, 3.14 * 0.75), (6, 6, 3.14/4), (0, 0, 0)
+        ],
+        max_lin_vel=0.8, max_yaw_vel=1.0, pos_tol=0.5, yaw_tol=0.2,
+    )
         
 @configclass
 class G1NPCVelPolicyEventsCfg:
