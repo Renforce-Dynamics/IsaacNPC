@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import torch
 from dataclasses import MISSING
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Tuple
 
 from isaaclab.assets import Articulation
 from isaaclab.managers import ActionTerm, ActionTermCfg
@@ -17,23 +17,23 @@ class NPCActionRoutine(NPCActionVel):
     cfg: "NPCActionRoutineCfg"
 
     def __init__(self, cfg, env):
-        super().__init__(cfg, env)
+        # per-env waypoint pointer
+        self.target_pos_ptr = torch.zeros(
+            (env.num_envs,), device=env.device, dtype=torch.long
+        )
 
         # planner is stateless, shared across envs
         self.planner = BatchVelocityPlanner(0.5, 0.5)
 
         # routine points: (K, 3) -> (x, y, yaw)
         self.routine_points = (
-            torch.tensor(cfg.routine_points, dtype=torch.float32, device=self.device)
+            torch.tensor(cfg.routine_points, dtype=torch.float32, device=env.device)
             .reshape(-1, 3)
-        )
-
-        # per-env waypoint pointer
-        self.target_pos_ptr = torch.zeros(
-            (self.num_envs,), device=self.device, dtype=torch.long
         )
         
         self.total_rountine_points = self.routine_points.shape[0] - 1
+        
+        super().__init__(cfg, env)
 
     def reset(self, env_ids=None):
         super().reset(env_ids)
@@ -63,9 +63,9 @@ class NPCActionRoutine(NPCActionVel):
         Produces (N,3) velocity commands.
         """
 
-        pos = self.root_pos_env[:, :2]  # (N,2)
+        pos = self.root_pos_env()[:, :2]  # (N,2)
         quat = self.robot.data.root_quat_w
-        yaw = math_utils.quat_to_euler_xyz(quat)[..., 2]  # (N,)
+        _, _, yaw = math_utils.euler_xyz_from_quat(quat)  # (N,)
         goal_pos, goal_yaw = self._get_current_targets()
         arrived = self.planner.check_arrival(pos, yaw, goal_pos, goal_yaw)
 
@@ -79,7 +79,7 @@ class NPCActionRoutine(NPCActionVel):
         cmd, _ = self.planner.compute_cmd(pos, yaw, goal_pos, goal_yaw)
         return cmd
 
-
+@configclass
 class NPCActionRoutineCfg(NPCActionVelCfg):
     class_type = NPCActionRoutine
-    routine_points: list = MISSING   # list of [x, y, yaw]
+    routine_points: List[Tuple[float, float, float]] = MISSING   # list of [x, y, yaw]

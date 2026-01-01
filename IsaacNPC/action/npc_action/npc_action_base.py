@@ -76,8 +76,8 @@ class NPCActionBase(NullAction):
         self._low_level_action_term.apply_actions()
         self._counter += 1
         
-    def root_pos_env(self):
-        return self.robot.data.root_pos_w - self.env.scene.env_origins
+    def root_pos_env(self) -> torch.Tensor:
+        return self.robot.data.root_pos_w - self._env.scene.env_origins
         
 @configclass
 class NPCActionBaseCfg(NullActionCfg):
